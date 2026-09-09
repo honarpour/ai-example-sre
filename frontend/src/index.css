@@ -1,0 +1,158 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "@fontsource-variable/geist";
+@import "@fontsource-variable/jetbrains-mono";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme {
+  --font-sans: "Geist Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono Variable", ui-monospace, SFMono-Regular, monospace;
+}
+
+/* Light palette kept complete per design guidelines, but this product defaults to dark
+   (see main.tsx) — on-call tooling lives in dark mode. */
+:root {
+  --background: oklch(0.99 0.002 260);
+  --foreground: oklch(0.18 0.02 260);
+  --muted: oklch(0.95 0.005 260);
+  --muted-foreground: oklch(0.48 0.02 260);
+  --border: oklch(0.89 0.01 260);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.18 0.02 260);
+  --primary: oklch(0.55 0.16 235);
+  --primary-foreground: oklch(0.98 0 0);
+  --destructive: oklch(0.55 0.22 25);
+  --destructive-foreground: oklch(0.98 0 0);
+  --success: oklch(0.58 0.14 155);
+  --warning: oklch(0.68 0.16 70);
+  --ring: oklch(0.55 0.16 235);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.18 0.02 260);
+  --secondary: oklch(0.95 0.005 260);
+  --secondary-foreground: oklch(0.18 0.02 260);
+  --accent: oklch(0.94 0.02 235);
+  --accent-foreground: oklch(0.3 0.05 235);
+  --input: oklch(0.89 0.01 260);
+  --radius: 0.5rem;
+
+  --sev-critical: oklch(0.55 0.22 25);
+  --sev-high: oklch(0.65 0.19 45);
+  --sev-medium: oklch(0.72 0.15 80);
+  --sev-low: oklch(0.55 0.02 260);
+  --conf-high: oklch(0.58 0.14 155);
+  --conf-medium: oklch(0.72 0.15 80);
+  --conf-low: oklch(0.5 0.02 260);
+}
+
+:root:not([data-theme="light"]),
+:root[data-theme="dark"] {
+  --background: oklch(0.16 0.014 260);
+  --foreground: oklch(0.93 0.006 260);
+  --muted: oklch(0.22 0.014 260);
+  --muted-foreground: oklch(0.62 0.014 260);
+  --border: oklch(1 0 0 / 9%);
+  --card: oklch(0.195 0.014 260);
+  --card-foreground: oklch(0.93 0.006 260);
+  --primary: oklch(0.74 0.13 220);
+  --primary-foreground: oklch(0.15 0.02 260);
+  --destructive: oklch(0.65 0.2 22);
+  --destructive-foreground: oklch(0.98 0 0);
+  --success: oklch(0.72 0.14 155);
+  --warning: oklch(0.78 0.15 75);
+  --ring: oklch(0.74 0.13 220);
+  --popover: oklch(0.205 0.014 260);
+  --popover-foreground: oklch(0.93 0.006 260);
+  --secondary: oklch(0.26 0.014 260);
+  --secondary-foreground: oklch(0.93 0.006 260);
+  --accent: oklch(0.28 0.03 220);
+  --accent-foreground: oklch(0.85 0.06 220);
+  --input: oklch(1 0 0 / 12%);
+
+  --sev-critical: oklch(0.65 0.2 22);
+  --sev-high: oklch(0.72 0.17 45);
+  --sev-medium: oklch(0.78 0.14 80);
+  --sev-low: oklch(0.62 0.014 260);
+  --conf-high: oklch(0.72 0.14 155);
+  --conf-medium: oklch(0.78 0.14 80);
+  --conf-low: oklch(0.6 0.014 260);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-ring: var(--ring);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-input: var(--input);
+  --color-sev-critical: var(--sev-critical);
+  --color-sev-high: var(--sev-high);
+  --color-sev-medium: var(--sev-medium);
+  --color-sev-low: var(--sev-low);
+  --color-conf-high: var(--conf-high);
+  --color-conf-medium: var(--conf-medium);
+  --color-conf-low: var(--conf-low);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+}
+
+/* react-resizable-panels' PanelGroup renders with an inline `height: 100%` (not
+   configurable via className, so it can't be overridden the way h-dvh on the group
+   itself was before) — a percentage height only resolves to something real if every
+   ancestor up to here also has an explicit height too. Without this, html/body/#root
+   default to height:auto, `100%` collapses to content size, and the whole app layout
+   grows to fit its tallest content instead of staying pinned to the viewport with
+   internal scrolling (html's own % is special-cased against the viewport per spec, so
+   this chain is well-defined all the way down). */
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  @apply bg-background text-foreground;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    @apply font-sans;
+  }
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+.animate-pulse-dot {
+  animation: pulse-dot 1.4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}

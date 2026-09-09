@@ -1,0 +1,30 @@
+# Python
+backend/.venv/
+backend/__pycache__/
+backend/**/__pycache__/
+backend/.pytest_cache/
+backend/.mypy_cache/
+backend/.ruff_cache/
+*.pyc
+
+# Node
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+
+# Env
+.env
+.env.local
+backend/.env
+frontend/.env.local
+observability-stack/.env
+
+# OS
+.DS_Store
+
+# Editors
+.vscode/
+.idea/
+
+# Eval / scratch outputs
+backend/evals/results/

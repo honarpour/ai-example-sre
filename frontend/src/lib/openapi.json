@@ -1,0 +1,1081 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "AI SRE Investigator",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/api/scenarios": {
+      "get": {
+        "summary": "List Scenarios",
+        "description": "Powers the 'Create Alert' preset picker \u2014 one entry per demo scenario, sourced\ndirectly from the fixtures so the UI can never drift from what's actually mocked.",
+        "operationId": "list_scenarios_api_scenarios_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ScenarioSummary"
+                  },
+                  "type": "array",
+                  "title": "Response List Scenarios Api Scenarios Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/alerts": {
+      "post": {
+        "summary": "Create Alert",
+        "description": "Single ingress path for both the webhook and the 'Create Alert' UI button \u2014\nboth post this exact shape. A preset click can send just `{\"scenario\": \"...\"}`;\na raw webhook must send title/service/severity/message directly.",
+        "operationId": "create_alert_api_alerts_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAlertRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Investigation"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/investigations": {
+      "get": {
+        "summary": "List Investigations",
+        "operationId": "list_investigations_api_investigations_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Investigation"
+                  },
+                  "type": "array",
+                  "title": "Response List Investigations Api Investigations Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/investigations/{investigation_id}": {
+      "get": {
+        "summary": "Get Investigation",
+        "operationId": "get_investigation_api_investigations__investigation_id__get",
+        "parameters": [
+          {
+            "name": "investigation_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Investigation Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Investigation"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/investigations/{investigation_id}/stream": {
+      "get": {
+        "summary": "Stream Investigation",
+        "operationId": "stream_investigation_api_investigations__investigation_id__stream_get",
+        "parameters": [
+          {
+            "name": "investigation_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Investigation Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/investigations/{investigation_id}/feedback": {
+      "post": {
+        "summary": "Submit Feedback",
+        "operationId": "submit_feedback_api_investigations__investigation_id__feedback_post",
+        "parameters": [
+          {
+            "name": "investigation_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Investigation Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubmitFeedbackRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Investigation"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/investigations/{investigation_id}/ask": {
+      "post": {
+        "summary": "Ask Follow Up Route",
+        "operationId": "ask_follow_up_route_api_investigations__investigation_id__ask_post",
+        "parameters": [
+          {
+            "name": "investigation_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Investigation Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AskFollowUpRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AskFollowUpResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/health": {
+      "get": {
+        "summary": "Health",
+        "operationId": "health_api_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object",
+                  "title": "Response Health Api Health Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ActionKind": {
+        "type": "string",
+        "enum": [
+          "immediate_mitigation",
+          "verification",
+          "durable_fix"
+        ],
+        "title": "ActionKind"
+      },
+      "AgentStep": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "tool_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tool Name"
+          },
+          "tool_input": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tool Input"
+          },
+          "tool_output_summary": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tool Output Summary"
+          },
+          "status": {
+            "$ref": "#/components/schemas/AgentStepStatus"
+          },
+          "started_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Started At"
+          },
+          "finished_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Finished At"
+          },
+          "evidence_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Evidence Ids"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "label",
+          "tool_name",
+          "tool_input",
+          "tool_output_summary",
+          "status",
+          "started_at",
+          "finished_at",
+          "evidence_ids",
+          "error"
+        ],
+        "title": "AgentStep"
+      },
+      "AgentStepStatus": {
+        "type": "string",
+        "enum": [
+          "running",
+          "complete",
+          "error"
+        ],
+        "title": "AgentStepStatus"
+      },
+      "Alert": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "service": {
+            "type": "string",
+            "title": "Service"
+          },
+          "severity": {
+            "$ref": "#/components/schemas/Severity"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "stack_trace": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stack Trace"
+          },
+          "fired_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Fired At"
+          },
+          "source": {
+            "$ref": "#/components/schemas/AlertSource",
+            "default": "manual"
+          },
+          "scenario": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Scenario"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "service",
+          "severity",
+          "message",
+          "stack_trace",
+          "fired_at",
+          "source",
+          "scenario"
+        ],
+        "title": "Alert"
+      },
+      "AlertSource": {
+        "type": "string",
+        "enum": [
+          "webhook",
+          "manual"
+        ],
+        "title": "AlertSource"
+      },
+      "AskFollowUpRequest": {
+        "properties": {
+          "question": {
+            "type": "string",
+            "title": "Question"
+          }
+        },
+        "type": "object",
+        "required": [
+          "question"
+        ],
+        "title": "AskFollowUpRequest"
+      },
+      "AskFollowUpResponse": {
+        "properties": {
+          "answer": {
+            "type": "string",
+            "title": "Answer"
+          },
+          "cited_evidence_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Cited Evidence Ids"
+          }
+        },
+        "type": "object",
+        "required": [
+          "answer",
+          "cited_evidence_ids"
+        ],
+        "title": "AskFollowUpResponse"
+      },
+      "Confidence": {
+        "type": "string",
+        "enum": [
+          "high",
+          "medium",
+          "low"
+        ],
+        "title": "Confidence"
+      },
+      "CreateAlertRequest": {
+        "properties": {
+          "title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          },
+          "service": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Service"
+          },
+          "severity": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Severity"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Message"
+          },
+          "stack_trace": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stack Trace"
+          },
+          "fired_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fired At"
+          },
+          "source": {
+            "$ref": "#/components/schemas/AlertSource",
+            "default": "manual"
+          },
+          "scenario": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Scenario"
+          }
+        },
+        "type": "object",
+        "title": "CreateAlertRequest",
+        "description": "Body for POST /api/alerts. A raw-JSON alert (from a real webhook) supplies title/\nservice/severity/message directly. A scenario-preset alert (from the 'Create Alert'\nUI) may supply only `scenario` \u2014 the server fills the rest in from the fixture's\nAlertTemplate, so the frontend never duplicates alert content that already lives in\nthe fixtures. Any field given explicitly overrides the scenario's default."
+      },
+      "Evidence": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/EvidenceKind"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "summary": {
+            "type": "string",
+            "title": "Summary"
+          },
+          "detail": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Detail"
+          },
+          "occurred_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Occurred At"
+          },
+          "source_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Url"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "kind",
+          "title",
+          "summary",
+          "detail",
+          "occurred_at",
+          "source_url"
+        ],
+        "title": "Evidence"
+      },
+      "EvidenceKind": {
+        "type": "string",
+        "enum": [
+          "commit",
+          "pull_request",
+          "deploy",
+          "code_owner",
+          "log",
+          "metric",
+          "error_group",
+          "service_map"
+        ],
+        "title": "EvidenceKind"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "Hypothesis": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "rank": {
+            "type": "integer",
+            "title": "Rank"
+          },
+          "summary": {
+            "type": "string",
+            "title": "Summary"
+          },
+          "reasoning": {
+            "type": "string",
+            "title": "Reasoning"
+          },
+          "confidence": {
+            "$ref": "#/components/schemas/Confidence"
+          },
+          "evidence_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Evidence Ids"
+          },
+          "suggested_actions": {
+            "items": {
+              "$ref": "#/components/schemas/SuggestedAction"
+            },
+            "type": "array",
+            "title": "Suggested Actions"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "rank",
+          "summary",
+          "reasoning",
+          "confidence",
+          "evidence_ids",
+          "suggested_actions"
+        ],
+        "title": "Hypothesis"
+      },
+      "Investigation": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "alert": {
+            "$ref": "#/components/schemas/Alert"
+          },
+          "status": {
+            "$ref": "#/components/schemas/InvestigationStatus",
+            "default": "queued"
+          },
+          "tldr": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tldr"
+          },
+          "steps": {
+            "items": {
+              "$ref": "#/components/schemas/AgentStep"
+            },
+            "type": "array",
+            "title": "Steps"
+          },
+          "evidence": {
+            "items": {
+              "$ref": "#/components/schemas/Evidence"
+            },
+            "type": "array",
+            "title": "Evidence"
+          },
+          "hypotheses": {
+            "items": {
+              "$ref": "#/components/schemas/Hypothesis"
+            },
+            "type": "array",
+            "title": "Hypotheses"
+          },
+          "feedback": {
+            "items": {
+              "$ref": "#/components/schemas/InvestigationFeedback"
+            },
+            "type": "array",
+            "title": "Feedback"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Warnings"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "completed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completed At"
+          },
+          "total_tool_calls": {
+            "type": "integer",
+            "title": "Total Tool Calls",
+            "default": 0
+          },
+          "total_cost_usd": {
+            "type": "number",
+            "title": "Total Cost Usd",
+            "default": 0.0
+          },
+          "wall_time_ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Wall Time Ms"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "alert",
+          "status",
+          "tldr",
+          "steps",
+          "evidence",
+          "hypotheses",
+          "feedback",
+          "warnings",
+          "created_at",
+          "completed_at",
+          "total_tool_calls",
+          "total_cost_usd",
+          "wall_time_ms",
+          "error"
+        ],
+        "title": "Investigation"
+      },
+      "InvestigationFeedback": {
+        "properties": {
+          "hypothesis_id": {
+            "type": "string",
+            "title": "Hypothesis Id"
+          },
+          "helpful": {
+            "type": "boolean",
+            "title": "Helpful"
+          },
+          "actual_root_cause": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Actual Root Cause"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "hypothesis_id",
+          "helpful",
+          "created_at"
+        ],
+        "title": "InvestigationFeedback"
+      },
+      "InvestigationStatus": {
+        "type": "string",
+        "enum": [
+          "queued",
+          "triaging",
+          "investigating",
+          "synthesizing",
+          "complete",
+          "needs_input",
+          "failed"
+        ],
+        "title": "InvestigationStatus"
+      },
+      "ScenarioSummary": {
+        "properties": {
+          "key": {
+            "type": "string",
+            "title": "Key"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "service": {
+            "type": "string",
+            "title": "Service"
+          },
+          "severity": {
+            "$ref": "#/components/schemas/Severity"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          }
+        },
+        "type": "object",
+        "required": [
+          "key",
+          "name",
+          "description",
+          "service",
+          "severity",
+          "title"
+        ],
+        "title": "ScenarioSummary"
+      },
+      "Severity": {
+        "type": "string",
+        "enum": [
+          "critical",
+          "high",
+          "medium",
+          "low"
+        ],
+        "title": "Severity"
+      },
+      "SubmitFeedbackRequest": {
+        "properties": {
+          "hypothesis_id": {
+            "type": "string",
+            "title": "Hypothesis Id"
+          },
+          "helpful": {
+            "type": "boolean",
+            "title": "Helpful"
+          },
+          "actual_root_cause": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Actual Root Cause"
+          }
+        },
+        "type": "object",
+        "required": [
+          "hypothesis_id",
+          "helpful"
+        ],
+        "title": "SubmitFeedbackRequest",
+        "description": "Body for POST /investigations/{id}/feedback. `created_at` is server-set on\nthe resulting InvestigationFeedback \u2014 the client's clock isn't trustworthy and\ndoesn't need to be."
+      },
+      "SuggestedAction": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/ActionKind"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "command": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Command"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "kind",
+          "title",
+          "description",
+          "command"
+        ],
+        "title": "SuggestedAction"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    }
+  }
+}

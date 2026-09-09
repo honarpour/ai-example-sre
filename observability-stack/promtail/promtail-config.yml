@@ -1,0 +1,30 @@
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: /tmp/positions.yaml
+
+clients:
+  - url: http://loki:3100/loki/api/v1/push
+
+scrape_configs:
+  - job_name: docker
+    docker_sd_configs:
+      - host: unix:///var/run/docker.sock
+        refresh_interval: 5s
+    relabel_configs:
+      - source_labels: ["__meta_docker_container_name"]
+        regex: "/(.*)"
+        target_label: "container"
+    # The demo service logs structured JSON with its own "service" field (the
+    # domain name, e.g. "payments-api") — that's the label our LiveObservabilitySource
+    # actually queries by, not the docker container name (which would be
+    # "demo-service", an infra name with no meaning to the agent). Parsing it out
+    # of the log body is also just the realistic way this is done in practice.
+    pipeline_stages:
+      - json:
+          expressions:
+            service: service
+      - labels:
+          service:

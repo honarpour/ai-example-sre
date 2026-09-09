@@ -1,0 +1,97 @@
+# A minimal self-hosted observability stack (PLAN.md Phase 7b) + a toy monitored
+# service, purely to give the live ObservabilitySource adapter something real to
+# query. Not part of the AI SRE Investigator's own deployment — this is the thing
+# being monitored, not the investigator.
+#
+# GlitchTip stands in for self-hosted Sentry: official self-hosted Sentry is a
+# ~13-container stack (Kafka, Clickhouse, Zookeeper, its own Postgres/Redis) that's
+# disproportionate for a demo. GlitchTip implements Sentry's ingestion protocol and
+# a compatible Issues API at a fraction of the operational weight.
+
+services:
+  prometheus:
+    image: prom/prometheus:v2.55.1
+    ports: ["9090:9090"]
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.retention.time=6h"
+
+  loki:
+    image: grafana/loki:3.2.1
+    ports: ["3100:3100"]
+    volumes:
+      - ./loki/loki-config.yml:/etc/loki/local-config.yaml:ro
+    command: ["-config.file=/etc/loki/local-config.yaml"]
+
+  promtail:
+    image: grafana/promtail:3.2.1
+    volumes:
+      - ./promtail/promtail-config.yml:/etc/promtail/config.yml:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    command: ["-config.file=/etc/promtail/config.yml"]
+    depends_on: [loki]
+
+  grafana:
+    image: grafana/grafana:11.3.1
+    ports: ["3000:3000"]
+    environment:
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: "Admin"
+    depends_on: [prometheus, loki]
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: glitchtip
+      POSTGRES_PASSWORD: glitchtip
+      POSTGRES_USER: glitchtip
+    volumes:
+      - glitchtip-postgres:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+
+  glitchtip:
+    image: glitchtip/glitchtip:v4.1.1
+    ports: ["8001:8000"]
+    depends_on: [postgres, redis]
+    environment: &glitchtip-env
+      DATABASE_URL: postgres://glitchtip:glitchtip@postgres:5432/glitchtip
+      SECRET_KEY: demo-only-not-for-production-use-change-me
+      PORT: "8000"
+      EMAIL_URL: "consolemail://"
+      GLITCHTIP_DOMAIN: "http://localhost:8001"
+      DEFAULT_FROM_EMAIL: "noreply@example.com"
+      CELERY_WORKER_AUTOSCALE: "1,1"
+
+  glitchtip-worker:
+    image: glitchtip/glitchtip:v4.1.1
+    command: ./bin/run-celery-with-beat.sh
+    depends_on: [postgres, redis]
+    environment: *glitchtip-env
+
+  glitchtip-migrate:
+    image: glitchtip/glitchtip:v4.1.1
+    command: ./manage.py migrate
+    depends_on: [postgres]
+    environment: *glitchtip-env
+
+  demo-service:
+    build: ./demo-service
+    ports: ["8010:8000"]
+    environment:
+      GLITCHTIP_DSN: "${GLITCHTIP_DSN:-}"
+    depends_on: [prometheus]
+
+  load-generator:
+    build: ./load-generator
+    environment:
+      TARGET_URL: "http://demo-service:8000"
+      CONCURRENCY: "15"
+      RATE_HZ_PER_WORKER: "5"
+    depends_on: [demo-service]
+
+volumes:
+  glitchtip-postgres:
